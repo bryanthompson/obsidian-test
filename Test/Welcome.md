@@ -1,0 +1,1 @@
+This is a test to see how github handles Obsidian vaults. Hopefully it is viewable in some convenient way. 

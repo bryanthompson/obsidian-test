@@ -1,0 +1,9 @@
+{
+	"nodes":[
+		{"id":"f864726e0a76cd8c","x":-83,"y":129,"width":250,"height":60,"type":"text","text":"This is a test"},
+		{"id":"622452196cef99fd","x":-83,"y":240,"width":250,"height":60,"type":"text","text":"Linked to an item. "}
+	],
+	"edges":[
+		{"id":"2b7597c54f869657","fromNode":"f864726e0a76cd8c","fromSide":"bottom","toNode":"622452196cef99fd","toSide":"top"}
+	]
+}
