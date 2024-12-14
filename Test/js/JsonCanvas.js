@@ -1,7 +1,6 @@
 import { h, render } from 'https://esm.sh/preact';
-import { useRef, useEffect, useState } from 'https://esm.sh/preact/hooks';
+import { useRef, useState, useEffect } from 'https://esm.sh/preact/hooks';
 
-// Helper: Map side names to SVG alignment points
 const sideToOffset = {
   top: (width, height) => ({ x: width / 2, y: 0 }),
   bottom: (width, height) => ({ x: width / 2, y: height }),
@@ -9,115 +8,101 @@ const sideToOffset = {
   right: (width, height) => ({ x: width, y: height / 2 }),
 };
 
-// Canvas component
-export function JsonCanvas({ data }) {
+export function JsonCanvas({ data, containerRef }) {
   const [nodes, setNodes] = useState(data.nodes);
-  const svgRef = useRef();
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [draggingNode, setDraggingNode] = useState(null);
+  const panStart = useRef(null);
 
-  // Drag handling
-  const handleDrag = (e, id) => {
-    const svgBounds = svgRef.current.getBoundingClientRect();
-    const newX = e.clientX - svgBounds.left;
-    const newY = e.clientY - svgBounds.top;
+  // Ensure container dimensions are available
+  const containerBounds = containerRef.current?.getBoundingClientRect();
+
+  // Handle node drag start
+  const handleNodeDragStart = (e, id) => {
+    e.stopPropagation(); // Prevent triggering pan
+    setDraggingNode({ id, startX: e.clientX, startY: e.clientY });
+  };
+
+  // Handle node dragging
+  const handleNodeDrag = (e) => {
+    if (!draggingNode) return;
+
+    const { id, startX, startY } = draggingNode;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
 
     setNodes((currentNodes) =>
       currentNodes.map((node) =>
-        node.id === id
-          ? { ...node, x: newX - node.width / 2, y: newY - node.height / 2 }
-          : node
+        node.id === id ? { ...node, x: node.x + dx, y: node.y + dy } : node
       )
     );
+
+    setDraggingNode({ id, startX: e.clientX, startY: e.clientY });
   };
 
-  // Render nodes
+  // Handle node drag end
+  const handleNodeDragEnd = () => {
+    setDraggingNode(null);
+  };
+
+  // Handle background pan start
+  const handlePanStart = (e) => {
+    if (draggingNode) return; // Ignore if dragging a node
+    if (!containerBounds) return;
+
+    panStart.current = {
+      x: e.clientX - panOffset.x,
+      y: e.clientY - panOffset.y,
+    };
+  };
+
+  // Handle background panning
+  const handlePanMove = (e) => {
+    if (!panStart.current) return;
+
+    const dx = e.clientX - panStart.current.x;
+    const dy = e.clientY - panStart.current.y;
+
+    setPanOffset({ x: dx, y: dy });
+  };
+
+  // Handle background pan end
+  const handlePanEnd = () => {
+    panStart.current = null;
+  };
+
   const renderNodes = () =>
     nodes.map((node) => {
-      switch (node.type) {
-        case 'text':
-          return h(
-            'g',
-            {
-              key: node.id,
-              transform: `translate(${node.x}, ${node.y})`,
-              onMouseDown: (e) => e.preventDefault(), // Prevent drag selection
-              onMouseMove: (e) => e.buttons === 1 && handleDrag(e, node.id),
-            },
-            h('rect', {
-              width: node.width,
-              height: node.height,
-              fill: '#fff',
-              stroke: '#495057',
-              rx: 8,
-            }),
-            h(
-              'text',
-              {
-                x: node.width / 2,
-                y: node.height / 2,
-                dominantBaseline: 'middle',
-                textAnchor: 'middle',
-              },
-              node.text
-            )
-          );
-        case 'link':
-          return h(
-            'g',
-            {
-              key: node.id,
-              transform: `translate(${node.x}, ${node.y})`,
-              onClick: () => window.open(node.url, '_blank'),
-              style: { cursor: 'pointer' },
-            },
-            h('rect', {
-              width: node.width,
-              height: node.height,
-              fill: '#d9f7be',
-              stroke: '#52c41a',
-              rx: 8,
-            }),
-            h(
-              'text',
-              {
-                x: node.width / 2,
-                y: node.height / 2,
-                dominantBaseline: 'middle',
-                textAnchor: 'middle',
-              },
-              'Open Link'
-            )
-          );
-        case 'file':
-          return h(
-            'g',
-            {
-              key: node.id,
-              transform: `translate(${node.x}, ${node.y})`,
-            },
-            h('rect', {
-              width: node.width,
-              height: node.height,
-              fill: '#e6f7ff',
-              stroke: '#1890ff',
-              rx: 8,
-            }),
-            h(
-              'text',
-              {
-                x: node.width / 2,
-                y: node.height / 2,
-                dominantBaseline: 'middle',
-                textAnchor: 'middle',
-              },
-              'File: ' + node.file
-            )
-          );
-        default:
-          return null;
-      }
+      return h(
+        'g',
+        {
+          key: node.id,
+          transform: `translate(${node.x}, ${node.y})`,
+          onMouseDown: (e) => handleNodeDragStart(e, node.id),
+          onMouseMove: (e) => e.buttons === 1 && handleNodeDrag(e),
+          onMouseUp: handleNodeDragEnd,
+          onMouseLeave: handleNodeDragEnd,
+        },
+        h('rect', {
+          width: node.width,
+          height: node.height,
+          fill: node.type === 'link' ? '#d9f7be' : '#fff',
+          stroke: node.type === 'link' ? '#52c41a' : '#495057',
+          rx: 8,
+        }),
+        h(
+          'text',
+          {
+            x: node.width / 2,
+            y: node.height / 2,
+            dominantBaseline: 'middle',
+            textAnchor: 'middle',
+          },
+          node.type === 'link' ? 'Open Link' : node.text
+        )
+      );
     });
 
-  // Render edges
   const renderEdges = () =>
     data.edges.map((edge) => {
       const fromNode = nodes.find((n) => n.id === edge.fromNode);
@@ -148,12 +133,14 @@ export function JsonCanvas({ data }) {
   return h(
     'svg',
     {
-      ref: svgRef,
       width: '100%',
       height: '100%',
-      style: { background: '#f8f9fa' },
+      style: { background: '#f8f9fa', cursor: panStart.current ? 'grabbing' : 'grab' },
+      onMouseDown: handlePanStart,
+      onMouseMove: handlePanMove,
+      onMouseUp: handlePanEnd,
+      onMouseLeave: handlePanEnd,
     },
-    // Define arrowhead marker
     h(
       'defs',
       null,
@@ -170,14 +157,26 @@ export function JsonCanvas({ data }) {
         h('polygon', { points: '0 0, 10 3.5, 0 7', fill: '#adb5bd' })
       )
     ),
-    // Render edges first to appear below nodes
-    renderEdges(),
-    // Render nodes
-    renderNodes()
+    h(
+      'g',
+      {
+        transform: `translate(${panOffset.x}, ${panOffset.y})`,
+      },
+      renderEdges(),
+      renderNodes()
+    )
   );
 }
 
 // Render the canvas
 export function renderCanvas(data, container) {
-  render(h(JsonCanvas, { data }), container);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (container) {
+      containerRef.current = container;
+    }
+  }, [container]);
+
+  render(h(JsonCanvas, { data, containerRef }), container);
 }
