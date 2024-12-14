@@ -1,9 +1,15 @@
 {
 	"nodes":[
-		{"id":"f864726e0a76cd8c","x":-83,"y":129,"width":250,"height":60,"type":"text","text":"This is a test"},
-		{"id":"622452196cef99fd","x":-83,"y":240,"width":250,"height":60,"type":"text","text":"Linked to an item. "}
+		{"id":"622452196cef99fd","type":"text","text":"Linked to an item. ","x":-120,"y":340,"width":250,"height":60},
+		{"id":"cfc80ff28d2e5d3f","type":"text","text":"Linked to an item. ","x":320,"y":260,"width":250,"height":60},
+		{"id":"f864726e0a76cd8c","type":"text","text":"This is a test","x":20,"y":80,"width":250,"height":60},
+		{"id":"8b66cd01a0fc066c","x":245,"y":480,"width":400,"height":320,"type":"link","url":"https://github.com/bryanthompson/obsidian-test"},
+		{"id":"a7422e42672ff725","x":740,"y":499,"width":400,"height":282,"type":"file","file":"Pasted image 20241213184526.png"}
 	],
 	"edges":[
-		{"id":"2b7597c54f869657","fromNode":"f864726e0a76cd8c","fromSide":"bottom","toNode":"622452196cef99fd","toSide":"top"}
+		{"id":"2b7597c54f869657","fromNode":"f864726e0a76cd8c","fromSide":"bottom","toNode":"622452196cef99fd","toSide":"top"},
+		{"id":"1db28d1b6c5804a0","fromNode":"f864726e0a76cd8c","fromSide":"right","toNode":"cfc80ff28d2e5d3f","toSide":"left"},
+		{"id":"80164d2064fbedba","fromNode":"622452196cef99fd","fromSide":"right","toNode":"cfc80ff28d2e5d3f","toSide":"left","fromEnd":"arrow"},
+		{"id":"ed731351ed5e0f7e","fromNode":"8b66cd01a0fc066c","fromSide":"right","toNode":"a7422e42672ff725","toSide":"left"}
 	]
 }

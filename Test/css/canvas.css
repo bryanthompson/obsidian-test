@@ -1,3 +1,4 @@
+/* Base styling for the canvas container */
 #canvas {
     position: fixed;
     top: 0;
@@ -8,37 +9,151 @@
     background-image: radial-gradient(#e9ecef 1px, transparent 1px);
     background-size: 24px 24px;
     box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    cursor: grab; /* Indicate panning is available */
 }
 
+/* SVG styling */
 #canvas svg {
     width: 100%;
     height: 100%;
     overflow: visible;
 }
 
-#canvas svg g {
-    stroke: #495057;
-    stroke-width: 1.5px;
-    transition: all 0.2s ease;
+/* General node styling */
+#canvas svg g.node {
+    cursor: pointer;
+    transition: transform 0.2s ease, stroke 0.2s ease;
 }
 
+#canvas svg g.node:hover {
+    stroke: #007bff; /* Highlight on hover */
+    transform: scale(1.05);
+}
+
+/* Rectangle node styling */
 #canvas svg rect {
     fill: #fff;
     stroke: #495057;
-    rx: 4px;
+    rx: 4px; /* Rounded corners */
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
+/* Circle node styling */
+#canvas svg circle {
+    fill: #e9ecef;
+    stroke: #495057;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Text styling for nodes */
 #canvas svg text {
     fill: #212529;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 14px;
+    text-anchor: middle;
+    dominant-baseline: central;
     pointer-events: none;
 }
 
+/* Line (edge) styling */
+#canvas svg line {
+    stroke: #adb5bd;
+    stroke-width: 1.5px;
+    fill: none;
+    marker-end: url(#arrowhead); /* Define arrowhead markers */
+}
+
+/* Arrowhead definition */
+#canvas svg defs marker#arrowhead {
+    fill: #adb5bd;
+    stroke: none;
+}
+
+/* Highlight edges on hover */
+#canvas svg line:hover {
+    stroke: #007bff;
+    stroke-width: 2px;
+}
+
+/* Path styling (for curved edges) */
 #canvas svg path {
     stroke: #adb5bd;
     stroke-width: 1.5px;
     fill: none;
     marker-end: url(#arrowhead);
+}
+
+/* Node dragging behavior */
+#canvas .dragging {
+    cursor: grabbing !important;
+    opacity: 0.7; /* Reduce opacity during drag */
+}
+
+/* Port styling for nodes */
+#canvas .port {
+    fill: #fff;
+    stroke: #495057;
+    stroke-width: 1px;
+    r: 5px; /* Port radius */
+    cursor: pointer;
+}
+
+#canvas .port:hover {
+    fill: #007bff;
+    stroke: #007bff;
+}
+
+/* Selected node and edge styling */
+#canvas .selected {
+    stroke: #007bff !important;
+    stroke-width: 2px !important;
+}
+
+/* Tooltip styling */
+#canvas .tooltip {
+    position: absolute;
+    background-color: #343a40;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+#canvas .tooltip.visible {
+    opacity: 1;
+}
+
+/* Context menu styling */
+#canvas .context-menu {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #adb5bd;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    z-index: 1000;
+    display: none;
+}
+
+#canvas .context-menu.visible {
+    display: block;
+}
+
+#canvas .context-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#canvas .context-menu ul li {
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#canvas .context-menu ul li:hover {
+    background-color: #f8f9fa;
 }
